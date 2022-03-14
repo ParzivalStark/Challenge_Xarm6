@@ -59,7 +59,7 @@ class Planner():
     for box in boxes:
       box_pose = PoseStamped()
       box_pose.header.frame_id = box
-      self.scene.add_box(box.lower(), box_pose, size=(0.0359288,0.017976,0.109964))
+      self.scene.add_box(box.lower(), box_pose, size=(0.359288,0.17976,0.109964))
 
   def goToPose(self,pose_goal):
 
@@ -152,7 +152,7 @@ class myNode():
         yeeeet = self.goal_pos("DepositBoxBlue")
         self.planner.goToPose(yeeeet)
         rospy.signal_shutdown("Task Completed")
-        rate.sleep()
+      rate.sleep()
 
 if __name__ == '__main__':
   try:
