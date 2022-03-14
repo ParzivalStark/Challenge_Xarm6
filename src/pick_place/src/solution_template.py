@@ -44,12 +44,14 @@ class Planner():
                "DepositBoxRed",
                "DepositBoxBlue"]
 
-    self.box_pose = PoseStamped()
+    '''self.box_pose = PoseStamped()
     self.box_pose.header.frame_id = "RedBox"
     box_name = "red_box"
-    self.scene.add_box(box_name, self.box_pose, size=(0.06,0.06,0.06))
-               
-    '''for target in targets:
+    self.scene.add_box(box_name, self.box_pose, size=(0.06,0.06,0.06))'''
+
+    rospy.sleep(1)
+
+    for target in targets:
       box_pose = PoseStamped()
       box_pose.header.frame_id = target
       self.scene.add_box(target.lower(), box_pose, size=(0.06,0.06,0.06))
@@ -57,7 +59,7 @@ class Planner():
     for box in boxes:
       box_pose = PoseStamped()
       box_pose.header.frame_id = box
-      self.scene.add_box(box.lower(), box_pose, size=(0.0359288,0.017976,0.109964))'''
+      self.scene.add_box(box.lower(), box_pose, size=(0.0359288,0.017976,0.109964))
 
   def goToPose(self,pose_goal):
 
@@ -123,7 +125,7 @@ class myNode():
     print(self.home)
     rate = rospy.Rate(60)
     while not rospy.is_shutdown():
-      '''self.getGoal('pick')
+      self.getGoal('pick')
       if(self.objective.goal != "End"):
         cube = self.objective.goal
         transform = self.goal_pos(cube, 0.1)
@@ -143,15 +145,14 @@ class myNode():
         transform = self.goal_pos(self.objective.goal, 0.1)
         self.planner.goToPose(transform)
       else:
-        
-      self.planner.goToPose(self.home.pose)'''
-      finish = self.home.pose
-      finish.position.z = 0.01
-      self.planner.goToPose(finish)
-      yeeeet = self.goal_pos("DepositBoxBlue")
-      self.planner.goToPose(yeeeet)
-      rospy.signal_shutdown("Task Completed")
-      rate.sleep()
+        self.planner.goToPose(self.home.pose)
+        finish = self.home.pose
+        finish.position.z = 0.01
+        self.planner.goToPose(finish)
+        yeeeet = self.goal_pos("DepositBoxBlue")
+        self.planner.goToPose(yeeeet)
+        rospy.signal_shutdown("Task Completed")
+        rate.sleep()
 
 if __name__ == '__main__':
   try:
