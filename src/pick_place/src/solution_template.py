@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import string
 import rospy
 import sys
 import tf_conversions
@@ -59,12 +60,21 @@ class Planner():
       box_pose.header.frame_id = target
       self.scene.add_box(target.lower(), box_pose, size=(0.06,0.06,0.06))
 
-    '''for box in boxes:
+    for box in boxes:
       box_pose = PoseStamped()
-      box_pose.header.frame_id = box
-      self.scene.add_box(box.lower(), box_pose, size=(0.359288,0.17976,0.109964))'''
-
-    rospy.loginfo("Obstacles Added")
+      direction = 1
+      for i in range(4):
+        box_pose = PoseStamped()
+        box_pose.header.frame_id = box
+        len_ = [0.359288, 0.017976]
+        wid_ = [0.017976, 0.157]
+        if i % 2 == 0:
+          box_pose.pose.position.y += (wid_[1]/2-len_[1]/2)*direction
+        else:
+          box_pose.pose.position.x += (len_[0]/2+len_[1]/2)*direction
+          direction *= -1
+        self.scene.add_box(box.lower()+str(i), box_pose, size=(len_[i%2],wid_[i%2],0.109964))
+      rospy.loginfo("Obstacles Added")
 
   def goToPose(self,pose_goal):
 
@@ -135,22 +145,14 @@ class myNode():
       self.getGoal('pick')
       if(self.objective.goal != "End"):
         cube = self.objective.goal
-        transform = self.goal_pos(cube, 0.1)
-        self.planner.goToPose(transform)
         transform = self.goal_pos(cube, -0.02)
         self.planner.goToPose(transform)
         self.planner.attachBox(cube)
-        transform = self.goal_pos(cube, 0.1)
-        self.planner.goToPose(transform)
 
         self.getGoal('place')
-        transform = self.goal_pos(self.objective.goal, 0.1)
-        self.planner.goToPose(transform)
         transform = self.goal_pos(self.objective.goal)
         self.planner.goToPose(transform)
         self.planner.detachBox(cube)
-        transform = self.goal_pos(self.objective.goal, 0.1)
-        self.planner.goToPose(transform)
       else:
         self.planner.goToPose(self.home.pose)
         '''finish = self.home.pose
