@@ -27,7 +27,7 @@ class Planner():
     self.eef_group = moveit_commander.MoveGroupCommander("xarm_gripper")
 
     self.arm_group.allow_replanning(True)
-    self.arm_group.set_goal_position_tolerance(0.0001)
+    self.arm_group.set_goal_position_tolerance(0.00001)
 
     self.attach_service = rospy.ServiceProxy("/AttachObject", AttachObject)
     self.openGripper = self.eef_group.get_current_joint_values()
