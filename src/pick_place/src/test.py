@@ -47,6 +47,9 @@ if __name__ == '__main__':
     move_group.set_goal_position_tolerance(0.005)
     move_group.set_goal_orientation_tolerance(0.05)
 
+    gripper = "xarm_gripper"
+    move_gripper = moveit_commander.MoveGroupCommander(gripper)
+
     #display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path', moveit_msgs.msg.DisplayTrajectory, queue_size=20)
 
     tfBuffer = tf2_ros.Buffer()
@@ -84,7 +87,6 @@ if __name__ == '__main__':
     move_group.go(joint_goal, wait=True)
 
     move_group.stop()
-'''
 
     response = call_RequestGoal_service('pick')
     rospy.loginfo(response.goal)
@@ -115,15 +117,30 @@ if __name__ == '__main__':
 
     joint_goal = move_group.get_current_joint_values()
     print(joint_goal)
-    joint_goal[0] = 0
-    joint_goal[1] = radians(-20)
-    joint_goal[2] = radians(-51)
-    joint_goal[3] = 0
-    joint_goal[4] = radians(71)
-    joint_goal[5] = 0
+    joint_goal[0] = 0    #joint1
+    joint_goal[1] = radians(-20)    #joint2
+    joint_goal[2] = radians(-51)    #joint3
+    joint_goal[3] = 0   #joint4
+    joint_goal[4] = radians(71) #joint5
+    joint_goal[5] = 0   #joint6
 
     move_group.go(joint_goal, wait=True)
 
     move_group.stop()
 
-    print("Move 2 done")
+    print("Move 2 done")'''
+
+    gripper_goal = move_gripper.get_current_joint_values()
+    print(gripper_goal)
+    gripper_goal[0] = radians(15)   #drive_joint
+    gripper_goal[1] = radians(15)   #left_finger
+    gripper_goal[2] = radians(15)   #left_inner
+    gripper_goal[3] = radians(15)   #right_inner
+    gripper_goal[4] = radians(15)   #right_outter
+    gripper_goal[5] = radians(15)   #right_finger
+
+    move_gripper.go(gripper_goal, wait=True)
+
+    move_gripper.stop()
+
+    print("Gripper closed")

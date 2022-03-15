@@ -11,6 +11,7 @@ from geometry_msgs.msg import PoseStamped, Pose
 from path_planner.srv import *
 from tf.transformations import *
 from moveit_msgs.msg import Grasp
+from math import radians
 
 class Planner():
 
@@ -26,9 +27,10 @@ class Planner():
     self.eef_group = moveit_commander.MoveGroupCommander("xarm_gripper")
 
     self.arm_group.allow_replanning(True)
-    self.arm_group.set_goal_position_tolerance(0.005)
+    self.arm_group.set_goal_position_tolerance(0.0001)
 
     self.attach_service = rospy.ServiceProxy("/AttachObject", AttachObject)
+    self.openGripper = self.eef_group.get_current_joint_values()
 
   def wait_for_state_update(self,box_name, box_is_known=False, box_is_attached=False, timeout=0.5):
 
@@ -87,12 +89,28 @@ class Planner():
 
   def detachBox(self,box_name):
     #TODO: Open the gripper and call the service that releases the box
+    self.eef_group.go(self.openGripper, wait=True)
+
+    self.eef_group.stop()
+
     self.attach_service(False, box_name)
     self.scene.remove_attached_object('xarm_gripper_base_link', name=box_name.lower())
 
 
   def attachBox(self,box_name):
     #TODO: Close the gripper and call the service that releases the box
+    gripper_goal = self.eef_group.get_current_joint_values()
+    gripper_goal[0] = radians(10)   #drive_joint
+    gripper_goal[1] = radians(10)   #left_finger
+    gripper_goal[2] = radians(10)   #left_inner
+    gripper_goal[3] = radians(10)   #right_inner
+    gripper_goal[4] = radians(10)   #right_outter
+    gripper_goal[5] = radians(10)   #right_finger
+
+    self.eef_group.go(gripper_goal, wait=True)
+
+    self.eef_group.stop()
+
     self.attach_service(True, box_name)
     touch_links = self.robot.get_link_names(group='xarm_gripper')
     self.scene.attach_box('xarm_gripper_base_link', box_name.lower(), touch_links=touch_links)
@@ -111,7 +129,7 @@ class myNode():
     self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
     self.planner  = Planner()
-    self.home     = self.planner.arm_group.get_current_pose()
+    self.home     = self.planner.arm_group.get_current_pose() 
 
   def getGoal(self,action):
 
