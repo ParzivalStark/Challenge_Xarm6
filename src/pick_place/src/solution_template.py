@@ -37,45 +37,56 @@ class Planner():
     #TODO: Whenever we change something in moveit we need to make sure that the interface has been updated properly
     pass
 
+  # Planner method designed for adding the obstacles inside the rviz interface
+  # for moveit to avoid them when path planning
   def addObstacles(self):
 
-    #TODO: Add obstables in the world
     rospy.loginfo("Adding Obstacles")
+
     #Cargo names
     targets = ["RedBox",
                "BlueBox",
                "GreenBox"]
+
     #goal names
     boxes = ["DepositBoxGreen",
                "DepositBoxRed",
                "DepositBoxBlue"]
 
-    '''self.box_pose = PoseStamped()
-    self.box_pose.header.frame_id = "RedBox"
-    box_name = "red_box"
-    self.scene.add_box(box_name, self.box_pose, size=(0.06,0.06,0.06))'''
-
+    # Sleep for 2 seconds in order to allow the planning scene interface to load correctly
     rospy.sleep(2)
 
+    # For loop to create all the target boxes
     for target in targets:
+      # Pose variable for the target box in the tf tree
       box_pose = PoseStamped()
       box_pose.header.frame_id = target
+      # Add box with specified position and size to the planning scene interface
       self.scene.add_box(target.lower(), box_pose, size=(0.06,0.06,0.06))
 
+    # For loop to create the goal containers
     for box in boxes:
+      # Pose variable for the goal container in the tf tree
       box_pose = PoseStamped()
+      # Variable for correct wall positioning
       direction = 1
+      # Loop for creating all 4 container's walls
       for i in range(4):
         box_pose = PoseStamped()
         box_pose.header.frame_id = box
+        # Walls' dimensions
         len_ = [0.359288, 0.017976]
         wid_ = [0.017976, 0.157]
+        # Condition to know if the current wall is vertical or horizontal
         if i % 2 == 0:
           box_pose.pose.position.y += (wid_[1]/2-len_[1]/2)*direction
         else:
           box_pose.pose.position.x += (len_[0]/2+len_[1]/2)*direction
           direction *= -1
+        # Add container with specified position and size to the planning scene interface
         self.scene.add_box(box.lower()+str(i), box_pose, size=(len_[i%2],wid_[i%2],0.109964))
+    
+    # All obstacles added correctly
     rospy.loginfo("Obstacles Added")
 
   def goToPose(self,pose_goal):
