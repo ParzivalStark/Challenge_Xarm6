@@ -18,7 +18,10 @@ class Planner():
     #TODO: Initialise move it interface
     moveit_commander.roscpp_initialize(sys.argv)
 
+    self.robot = moveit_commander.RobotCommander()
+
     self.scene = moveit_commander.PlanningSceneInterface()
+
     self.arm_group = moveit_commander.MoveGroupCommander("xarm6")
     self.eef_group = moveit_commander.MoveGroupCommander("xarm_gripper")
 
@@ -71,6 +74,7 @@ class Planner():
           box_pose.pose.position.x += (len_[0]/2+len_[1]/2)*direction
           direction *= -1
         self.scene.add_box(box.lower()+str(i), box_pose, size=(len_[i%2],wid_[i%2],0.109964))
+      rospy.loginfo("Obstacles Added")
 
   def goToPose(self,pose_goal):
 
@@ -84,11 +88,14 @@ class Planner():
   def detachBox(self,box_name):
     #TODO: Open the gripper and call the service that releases the box
     self.attach_service(False, box_name)
+    self.scene.remove_attached_object('xarm_gripper_base_link', name=box_name.lower())
 
 
   def attachBox(self,box_name):
     #TODO: Close the gripper and call the service that releases the box
     self.attach_service(True, box_name)
+    touch_links = self.robot.get_link_names(group='xarm_gripper')
+    self.scene.attach_box('xarm_gripper_base_link', box_name.lower(), touch_links=touch_links)
 
 
 
@@ -133,7 +140,6 @@ class myNode():
   def main(self):
     #TODO: Main code that contains the aplication
     self.planner.addObstacles()
-    print(self.home)
     rate = rospy.Rate(60)
     while not rospy.is_shutdown():
       self.getGoal('pick')
@@ -149,11 +155,11 @@ class myNode():
         self.planner.detachBox(cube)
       else:
         self.planner.goToPose(self.home.pose)
-        finish = self.home.pose
+        '''finish = self.home.pose
         finish.position.z = 0.01
         self.planner.goToPose(finish)
         yeeeet = self.goal_pos("DepositBoxBlue")
-        self.planner.goToPose(yeeeet)
+        self.planner.goToPose(yeeeet)'''
         rospy.signal_shutdown("Task Completed")
       rate.sleep()
 
