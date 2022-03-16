@@ -198,43 +198,66 @@ class myNode():
     pose_goal.orientation = self.home.pose.orientation
     return pose_goal
 
-
+  # Node main function, it calls all the needed methods for the robot to work properly
   def main(self):
-    #TODO: Main code that contains the aplication
+    # Adding obstacles to the planner
     self.planner.addObstacles()
+    # Specifying the ros node rate
     rate = rospy.Rate(60)
+
+    # Main loop until the node is shut down
     while not rospy.is_shutdown():
+      # Selection of the next goal using the get goal method
       self.getGoal('pick')
+
+      # Conditional for checking if there is still an objective
       if(self.objective.goal != "End"):
+        # Setting the cube as the objective
         cube = self.objective.goal
+        # Getting the transformation for hovering the cube
         transform = self.goal_pos(cube, 0.1)
         self.planner.goToPose(transform)
+        # Getting the transformation for reaching the cube
         transform = self.goal_pos(cube, -0.02)
         self.planner.goToPose(transform)
+        # Grab the cube
         self.planner.attachBox(cube)
+        # Getting the trasnformation for hovering the cube
         transform = self.goal_pos(cube, 0.1)
         self.planner.goToPose(transform)
 
+        # Selection of the next container
         self.getGoal('place')
+        # Getting the trasnformation for hovering the container
         transform = self.goal_pos(self.objective.goal, 0.1)
         self.planner.goToPose(transform)
+        # Getting the trasnformation for reaching the container
         transform = self.goal_pos(self.objective.goal)
         self.planner.goToPose(transform)
+        # Let go the cube
         self.planner.detachBox(cube)
+        # Getting the trasnformation for hovering the container
         transform = self.goal_pos(self.objective.goal, 0.1)
         self.planner.goToPose(transform)
         
       else:
+        # Go back to starting position
         self.planner.goToPose(self.home.pose)
         '''
+            --- Programmers' Easter Egg ---
+            Add an extra single cuote to execute --> '' 
+        # Removing the obstacles in rviz
         self.planner.scene.remove_world_object()
+        # Wait 4 seconds
         rospy.sleep(4)
         finish = self.home.pose
+        # Get 1 centimeter above the table
         finish.position.z = 0.01
         self.planner.goToPose(finish)
+        # Throw all the stuff out of the table
         yeeeet = self.goal_pos("DepositBoxBlue")
         self.planner.goToPose(yeeeet)
-        '''
+        #'''
         rospy.signal_shutdown("Task Completed")
       rate.sleep()
 
