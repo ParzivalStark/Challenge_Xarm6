@@ -101,12 +101,17 @@ class Planner():
     # All obstacles added correctly
     rospy.loginfo("Obstacles Added")
 
+  # Planner method that plans the path for the robot's motion and executes
+  # the corresponding joints motions to allow it to reach a specific frame
   def goToPose(self,pose_goal):
-
-    #TODO: Code used to move to a given position using move it
+    # Instruction that sets the current target
     self.arm_group.set_pose_target(pose_goal)
+    # Instruction to start the robot's motion and wait until it has finished
+    # the planed trajectory
     self.arm_group.go(wait=True)
+    # Instruction that stops the robot's motion
     self.arm_group.stop()
+    # Instruction for clearing the recently reached target
     self.arm_group.clear_pose_targets()
 
 
