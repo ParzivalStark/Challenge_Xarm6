@@ -157,7 +157,7 @@ class Planner():
 
 # Class for the ros node
 class myNode():
-  # Method to initialize Planner class
+  # Method to initialize myNode class
   def __init__(self):
     # Initialization of the ros node "Solution"
     rospy.init_node("Solution")
@@ -175,26 +175,33 @@ class myNode():
     # Saving the starting position for returning home at the end
     self.home     = self.planner.arm_group.get_current_pose() 
 
+  # myNode method to obtain the target
   def getGoal(self,action):
 
-    #TODO: Call the service that will provide you with a suitable target for the movement
+    # Call the service that will provide the target for the movement
     try:
         request_goal = rospy.ServiceProxy("/RequestGoal", RequestGoal)
         self.objective = request_goal(action)
     except rospy.ServiceException as e:
         rospy.logwarn(e)
 
-
+  # myNode method to obtain the transformation between goal and world
   def tf_goal(self, goal):
 
-    #TODO:Use tf2 to retrieve the position of the target with respect to the proper reference frame
+    # Use of tf2 to retrieve the position of the target with respect to the world frame
     result = self.tfBuffer.lookup_transform("world", goal, rospy.Time(), rospy.Duration(0.5))
+    # Return only translation of the transform
     return result.transform.translation
 
+  # myNode method to get target pose of the movement
   def goal_pos(self, goal, height = 0):
+    # Object Pose for the target pose
     pose_goal = Pose()
+    # Get position of the transformation between goal and world
     pose_goal.position = self.tf_goal(goal)
+    # Adjust height
     pose_goal.position.z += height
+    # Use home orientation of the robot
     pose_goal.orientation = self.home.pose.orientation
     return pose_goal
 
