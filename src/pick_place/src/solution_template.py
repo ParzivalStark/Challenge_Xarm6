@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+# Import neccesary libraries
 import string
 import rospy
 import sys
@@ -13,23 +15,33 @@ from tf.transformations import *
 from moveit_msgs.msg import Grasp
 from math import radians
 
-class Planner():
 
+# Class for moveit commander
+class Planner():
+  # Method to initialise Planner class
   def __init__(self):
-    #TODO: Initialise move it interface
+    # Initialise move it interface
     moveit_commander.roscpp_initialize(sys.argv)
 
+    # Instantiate a RobotCommander object. (Information of the robot)
     self.robot = moveit_commander.RobotCommander()
 
+    # Instantiate a PlanningSceneInterface object. (Information of the surrounding)
     self.scene = moveit_commander.PlanningSceneInterface()
 
+    # Instantiate MoveGroupCommander objects (Plan and execute motions)
     self.arm_group = moveit_commander.MoveGroupCommander("xarm6")
     self.eef_group = moveit_commander.MoveGroupCommander("xarm_gripper")
 
+    # Allow replanning of the motions
     self.arm_group.allow_replanning(True)
+    # Adjust precision of the planning
     self.arm_group.set_goal_position_tolerance(0.00001)
 
+    # Initialice client for the service AtthacObject
     self.attach_service = rospy.ServiceProxy("/AttachObject", AttachObject)
+
+    # Save initial joint values of the gripper
     self.openGripper = self.eef_group.get_current_joint_values()
 
   def wait_for_state_update(self,box_name, box_is_known=False, box_is_attached=False, timeout=0.5):
