@@ -114,20 +114,25 @@ class Planner():
     # Instruction for clearing the recently reached target
     self.arm_group.clear_pose_targets()
 
-
+  # Planner method to detach boxes from the gripper
   def detachBox(self,box_name):
-    #TODO: Open the gripper and call the service that releases the box
+    # Open the gripper using initial joint values
     self.eef_group.go(self.openGripper, wait=True)
 
+    # Instruction that stops the robot's motion
     self.eef_group.stop()
-
+    
+    # Call the service to deatach box in gazebo
     self.attach_service(False, box_name)
+
+    # Use moveit to detach box in rviz
     self.scene.remove_attached_object('xarm_gripper_base_link', name=box_name.lower())
 
-
+  # Planner method to attach boxes to the gripper
   def attachBox(self,box_name):
-    #TODO: Close the gripper and call the service that releases the box
+    # Get joint values
     gripper_goal = self.eef_group.get_current_joint_values()
+    # Modify joint values to close the gripper
     gripper_goal[0] = radians(10)   #drive_joint
     gripper_goal[1] = radians(10)   #left_finger
     gripper_goal[2] = radians(10)   #left_inner
@@ -135,11 +140,17 @@ class Planner():
     gripper_goal[4] = radians(10)   #right_outter
     gripper_goal[5] = radians(10)   #right_finger
 
+    # Instruction to start the gripper's motion and wait until it has finished
+    # the planed trajectory
     self.eef_group.go(gripper_goal, wait=True)
 
+    # Instruction that stops the gripper's motion
     self.eef_group.stop()
 
+    # Call the service that attach the box in gazebo
     self.attach_service(True, box_name)
+
+    # Use moveit to attach box in rviz
     touch_links = self.robot.get_link_names(group='xarm_gripper')
     self.scene.attach_box('xarm_gripper_base_link', box_name.lower(), touch_links=touch_links)
 
