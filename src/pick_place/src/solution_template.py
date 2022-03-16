@@ -18,9 +18,9 @@ from math import radians
 
 # Class for moveit commander
 class Planner():
-  # Method to initialise Planner class
+  # Method to initialize Planner class
   def __init__(self):
-    # Initialise move it interface
+    # Initialize move it interface
     moveit_commander.roscpp_initialize(sys.argv)
 
     # Instantiate a RobotCommander object. (Information of the robot)
@@ -38,7 +38,7 @@ class Planner():
     # Adjust precision of the planning
     self.arm_group.set_goal_position_tolerance(0.00001)
 
-    # Initialice client for the service AtthacObject
+    # Initialize client for the service AtthacObject
     self.attach_service = rospy.ServiceProxy("/AttachObject", AttachObject)
 
     # Save initial joint values of the gripper
@@ -144,19 +144,24 @@ class Planner():
     self.scene.attach_box('xarm_gripper_base_link', box_name.lower(), touch_links=touch_links)
 
 
-
+# Class for the ros node
 class myNode():
+  # Method to initialize Planner class
   def __init__(self):
-    #TODO: Initialise ROS and create the service calls
+    # Initialization of the ros node "Solution"
     rospy.init_node("Solution")
-    # Good practice trick, wait until the required services are online before continuing with the aplication
+    # Wait until the required services are online before continuing with the aplication
     rospy.wait_for_service('RequestGoal')
     rospy.wait_for_service('AttachObject')
 
+    # Instance of ros tf2 buffer
     self.tfBuffer = tf2_ros.Buffer()
+    # Listener for the recently instanciated tf2 buffer
     self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
+    # Instance of the planner class
     self.planner  = Planner()
+    # Saving the starting position for returning home at the end
     self.home     = self.planner.arm_group.get_current_pose() 
 
   def getGoal(self,action):
