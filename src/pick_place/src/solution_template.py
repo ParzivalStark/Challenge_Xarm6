@@ -226,11 +226,15 @@ class myNode():
         
       else:
         self.planner.goToPose(self.home.pose)
-        '''finish = self.home.pose
+        '''
+        self.planner.scene.remove_world_object()
+        rospy.sleep(4)
+        finish = self.home.pose
         finish.position.z = 0.01
         self.planner.goToPose(finish)
         yeeeet = self.goal_pos("DepositBoxBlue")
-        self.planner.goToPose(yeeeet)'''
+        self.planner.goToPose(yeeeet)
+        '''
         rospy.signal_shutdown("Task Completed")
       rate.sleep()
 
